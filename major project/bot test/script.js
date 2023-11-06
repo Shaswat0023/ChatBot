@@ -5,9 +5,9 @@ const sendChatBtn = document.querySelector(".chat-input span"); //selects the fi
 const chatbox = document.querySelector(".chatbox"); // selects an HTML element with the class "chatbox" and assigns it to the variable chatbox. This is where the chat messages will be displayed.
 
 // const voiceIcon = document.getElementById("voice-icon"); //selects an HTML element with the ID "voice-icon" and assigns it to the variable voiceIcon. This likely represents an icon or element related to voice input or output.
-
+const voiceRecognitionButton = document.getElementById("voiceRecognitionButton");
 let userMessage; //Declares a variable called userMessage which will be used to store the user's input message.
-
+const reminders = [];
 const API_KEY = "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";
 
 // This is a function declaration that defines a function called createChatLi. It takes two parameters, message  and className. This function is used to create a new chat message element.
@@ -19,7 +19,34 @@ const createChatLi = (message, className) => {
     return chatLi;
 }
 
+if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    let listening = false;
 
+    voiceRecognitionButton.addEventListener("click", () => {
+        if (listening) {
+            recognition.stop();
+            voiceRecognitionButton.textContent = "Start Voice Input";
+        } else {
+            recognition.start();
+            voiceRecognitionButton.textContent = "Stop Voice Input";
+        }
+        listening = !listening;
+    });
+
+    recognition.onresult = (event) => {
+        const voiceInput = event.results[event.results.length - 1][0].transcript;
+        chatInput.value = voiceInput; // Set the voice input in the textarea
+    };
+
+    // ... (rest of your voice recognition code)
+} else {
+    voiceRecognitionButton.disabled = true;
+    voiceRecognitionButton.textContent = "Voice Input Not Supported";
+    sendChatButton.disabled = true;
+}
 //It takes an incoming chat message element (incomingChatLi) as a parameter. This function is responsible for generating a response to the user's message.
 const generateResponse = (incomingChatLi) => {
     const API_URL = "https://api.openai.com/v1/chat/completions"; //This is where the code will send requests to generate responses using GPT-3.
@@ -30,11 +57,15 @@ const generateResponse = (incomingChatLi) => {
     const isAskingAi = userMessage.toLowerCase().includes("who are you?"); 
     const isAskingDayTime = /day|time/gi.test(userMessage); 
     const isGreeting = /hi|hello|hey/gi.test(userMessage);
+    const isAskingWeather = /weather in (.+)/i.test(userMessage);
 
     if (isAskingName) {
         messageElement.textContent = "My name is Oliver!";
+    } else if (isAskingWeather){
+        const location = userMessage.match(/weather in (.+)/i)[1];
+        getWeatherInfo(location, messageElement);
     } else if (isAskingAi) {
-            messageElement.textContent = "My name is Oliver!";
+            messageElement.textContent = "I am Oliver.!";
     
     } else if (isGreeting) {
         messageElement.textContent = "Hello there! I'm your virtual assistant, here to make your day a little brighter and your tasks a lot easier. Feel free to ask me anything, whether it's a question, a task, or just a friendly chat. I'm here to help and have a great conversation with you. What can I assist you with today?";
@@ -43,6 +74,26 @@ const generateResponse = (incomingChatLi) => {
         const formattedDate = currentDate.toLocaleDateString();
         const formattedTime = currentDate.toLocaleTimeString();
         messageElement.textContent = `The current date is ${formattedDate} and the time is ${formattedTime}`;
+    } else if (userMessage.toLowerCase().includes("remind me to")) {
+        const reminderMessage = userMessage.substring("remind me to".length).trim();
+        const currentTime = new Date();
+        const minutesToAdd = 1; 
+
+        currentTime.setMinutes(currentTime.getMinutes() + minutesToAdd);
+
+        createReminder(reminderMessage, currentTime);
+
+        messageElement.textContent = `I've set a reminder for "${reminderMessage}" in ${minutesToAdd} minutes.`;
+    } 
+    // Basic Math calculation code
+
+    if (/^\s*[+\-*/0-9.() ]+\s*$/.test(userMessage)) {
+        try {
+            const result = eval(userMessage);
+            messageElement.textContent = `The result of the calculation is: ${result}`;
+        } catch (error) {
+            messageElement.textContent = "Sorry, there was an error in the calculation. Please check your input.";
+        }
     } else {
         // object called requestOptions with the configuration for a HTTP POST request to the OpenAI API. It specifies the model to use, the message content, and the API key for authentication.
         const requestOptions = {
@@ -72,10 +123,129 @@ const generateResponse = (incomingChatLi) => {
     }
 }
 
-// used to scroll the chatbox to the bottom so that the most recent messages are visible.
-function scrollToBottom() {
-    chatbox.scrollTop = chatbox.scrollHeight;
+// Function to get local events or concerts happening tonight
+function getLocalEvents(messageElement) {
+    const EVENTBRITE_API_KEY = "CPYRLHDXBU74QSD5CW"; // Replace with your Eventbrite API key
+    const EVENTBRITE_API_URL = "https://www.eventbriteapi.com/v3/events/search";
+    const LOCATION = "Delhi"; // Replace with your desired location (e.g., city or coordinates)
+    const DATE = "T" + new Date().toISOString().substr(0, 10); // Today's date
+
+    const requestOptions = {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${EVENTBRITE_API_KEY}`
+        }
+    };
+    const apiUrl = `${EVENTBRITE_API_URL}?location.address=${LOCATION}&start_date.keyword=${DATE}`;
+
+    fetch(apiUrl, requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.events && data.events.length > 0) {
+                const events = data.events;
+                let eventResponse = "Here are the local events or concerts happening tonight:\n\n";
+
+                for (let i = 0; i < Math.min(5, events.length); i++) {
+                    const event = events[i];
+                    eventResponse += `${i + 1}. ${event.name.text}\n${event.url}\n\n`;
+                }
+
+                messageElement.textContent = eventResponse;
+            } else {
+                messageElement.textContent = "Sorry, I couldn't find any local events or concerts happening tonight.";
+            }
+        })
+        .catch((error) => {
+            messageElement.textContent = "Oops! Something went wrong while fetching local events.";
+        });
 }
+
+
+
+// function for weather 
+function getWeatherInfo(location, messageElement) {
+    const API_KEY_WEATHER = "3c3a7aa4b042ae8fd1af16ed4babe5a8"; 
+    const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY_WEATHER}`;
+
+    fetch(WEATHER_API_URL)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.cod === 200) {
+                const description = data.weather[0].description;
+                const temperature = (data.main.temp - 273.15).toFixed(2);
+                messageElement.textContent = `The weather in ${location} is ${description} with a temperature of ${temperature}°C.`;
+            } else {
+                messageElement.textContent = "Sorry, I couldn't find weather information for that location.";
+            }
+        })
+        .catch((error) => {
+            messageElement.textContent = "Oops! Something went wrong while fetching weather data.";
+        });
+}
+
+// Function to set a reminder
+const createReminder = (message, time) => {
+    const reminder = {
+        message,
+        time,
+    };
+    reminders.push(reminder);
+};
+
+// Function to check and trigger reminders
+const checkReminders = () => {
+    const currentTime = new Date();
+
+    for (let i = reminders.length - 1; i >= 0; i--) {
+        const reminder = reminders[i];
+        const reminderTime = new Date(reminder.time);
+
+        if (reminderTime <= currentTime) {
+            const reminderMessage = `⏰ Reminder: ${reminder.message}`;
+            const reminderChatLi = createChatLi(reminderMessage, "incoming");
+            chatbox.appendChild(reminderChatLi);
+            reminders.splice(i, 1);
+        }
+    }
+};
+
+function getLatestNews(messageElement) {
+    const NEWS_API_KEY = "YOUR_NEWS_API_KEY"; // Replace with your News API key
+    const NEWS_API_URL = "https://newsapi.org/v2/top-headlines";
+    const NEWS_API_COUNTRY = "us"; // You can change the country code as needed
+
+    const requestOptions = {
+        method: "GET"
+    };
+    const apiUrl = `${NEWS_API_URL}?country=${NEWS_API_COUNTRY}&apiKey=${NEWS_API_KEY}`;
+
+    fetch(apiUrl, requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status === "ok" && data.articles.length > 0) {
+                const articles = data.articles;
+                let newsResponse = "Here are the latest news headlines:\n\n";
+
+                for (let i = 0; i < Math.min(5, articles.length); i++) {
+                    const article = articles[i];
+                    newsResponse += `${i + 1}. ${article.title}\n${article.url}\n\n`;
+                }
+
+                messageElement.textContent = newsResponse;
+            } else {
+                messageElement.textContent = "Sorry, I couldn't retrieve the latest news at the moment.";
+            }
+        })
+        .catch((error) => {
+            messageElement.textContent = "Oops! Something went wrong while fetching the latest news.";
+        });
+}
+
+
+// used to scroll the chatbox to the bottom so that the most recent messages are visible.
+    function scrollToBottom() {
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
 
 //function captures the user's message, appends it to the chatbox as an outgoing message, clears the input field, displays a "Thinking..." message, generates a response, and scrolls to the bottom to show the latest messages in the chat interface. This function manages the user's input and the display of chat messages.
 const handleChat = () => {
