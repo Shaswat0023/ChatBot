@@ -223,11 +223,6 @@ body.dark-mode {
     display: inline-block; 
     transition: background 0.3s ease, color 0.3s ease;
 }
-#send-btn:hover {
-    background: #5639a6;
-    color: #fff;
-}
-
 .chatbot-close {
     position: absolute;
     top: 20px;
@@ -239,7 +234,26 @@ body.dark-mode {
     z-index: 2;
 }
 
-@media (max-width: 768px) {
+#voiceRecognitionButton {
+    background-color: #3498db; 
+    color: #fff; 
+    border: none; 
+    border-radius: 5px; 
+    padding: 10px 20px; 
+    font-size: 10px; /* Font size */
+    cursor: pointer; /* Change cursor on hover */
+    margin-top: 10px; /* Add space between the button and the text area */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Add smooth transitions for background-color and transform properties */
+  }
+  
+  #voiceRecognitionButton:hover {
+    background-color: #2980b9; /* Darker color on hover */
+    transform: scale(1.05); /* Add a slight scaling effect on hover */
+  }
+  
+
+
+  @media (max-width: 768px) {
     .chatbot {
         right: 0;
         bottom: 0;
@@ -270,8 +284,4 @@ body.dark-mode {
         top: 50%;
         transform: translateY(-50%);
     }
-    .chatbot-close {
-        top: 10px;
-        right: 10px;
-    }
-}
+   }
