@@ -16,7 +16,7 @@ const reminders = [];
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // Main Api Key
-const API_KEY = "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";
+const API_KEY = "Insert_OpenAi_Api_Key";
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -176,7 +176,7 @@ const generateResponse = (incomingChatLi) => {
 
 // function for weather 
 function getWeatherInfo(location, messageElement) {
-    const API_KEY_WEATHER = "3c3a7aa4b042ae8fd1af16ed4babe5a8"; 
+    const API_KEY_WEATHER = "Insert_OpenWeatherMap_Api_Key"; 
     const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY_WEATHER}`;
 
     fetch(WEATHER_API_URL)
