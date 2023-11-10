@@ -51,10 +51,8 @@ body.dark-mode {
     transform: scale(2);
 }
 .chatbot {
-    position: fixed;
-    right: 0; 
-    bottom: 0;
-    width: 100%; 
+    /* position: absolute; */
+    width: 100%;
     height: 100%;
     transform: scale(0.7);
     opacity: 1;
@@ -65,7 +63,8 @@ body.dark-mode {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease, background 5s ease infinite;
     background-size: 100% 100%;
-   
+    right: 0;
+    bottom: 0;
 }
 
 @keyframes gradientAnimation {
@@ -87,11 +86,11 @@ body.dark-mode {
 }
 
 .chatbot header {
-    background: #5639a6; 
+    background: #5639a6;
     padding: 16px 0;
     text-align: center;
     position: relative;
-    transition: background 0.3s ease; 
+    transition: background 0.3s ease;
 }
 
 .chatbot header:hover {
@@ -156,7 +155,6 @@ body.dark-mode {
     background: #f2f2f2;
     border-radius: 10px 10px 10px 0;
 }
-
 .chatbot .chat-input {
     position: absolute;
     bottom: 0;
@@ -192,6 +190,7 @@ body.dark-mode {
     visibility: visible;
 }
 
+
 .chat li {
     opacity: 0;
     transition: all 0.3s ease-in-out;
@@ -215,57 +214,49 @@ body.dark-mode {
     to { transform: translateX(0); }
 }
 
+
 .material-symbols-outlined {
     display: inline-block;
 }
 
-#send-btn {
-    display: inline-block; 
-    transition: background 0.3s ease, color 0.3s ease;
-}
-#send-btn {
-    background-color: #3498db;
+#send-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #5639a6;
     color: #fff;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
-    font-size: 16px; /* Adjust the font size as needed */
+    font-size: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
     margin-top: 10px;
-    display: inline-block;
-}
-#send-btn:hover {
-    background-color: #2980b9;
-    transform: scale(1.05);
-}
-.chatbot-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  #send-btn:hover {
+      background-color: #2980b9; /* Darker color on hover */
+      transform: scale(1.05); /* Add a slight scaling effect on hover */
+    }
+  #voiceRecognitionButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #5639a6;
     color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 10px;
     cursor: pointer;
-    display: none;
-    transform: translateY(-50%);
-    z-index: 2;
-}
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    
+    #voiceRecognitionButton:hover {
+      background-color: #2980b9; /* Darker color on hover */
+      transform: scale(1.05); /* Add a slight scaling effect on hover */
+    }
 
-#voiceRecognitionButton {
-    background-color: #3498db; 
-    color: #fff; 
-    border: none; 
-    border-radius: 5px; 
-    padding: 10px 20px; 
-    font-size: 10px; /* Font size */
-    cursor: pointer; /* Change cursor on hover */
-    margin-top: 10px; /* Add space between the button and the text area */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Add smooth transitions for background-color and transform properties */
-  }
-  
-  #voiceRecognitionButton:hover {
-    background-color: #2980b9; /* Darker color on hover */
-    transform: scale(1.05); /* Add a slight scaling effect on hover */
-  }
   
 
 
